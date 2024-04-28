@@ -40,7 +40,9 @@ def generate_qr_code(data):
 def format_timestamp(timestamp):
     return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 while True:
+    print("getting into this")
     ret, frame = cap.read()
+    print("camera opened")
     frame_counter += 1
     if not ret:
         break
