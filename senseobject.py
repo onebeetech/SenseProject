@@ -22,7 +22,7 @@ starting_time = time.time()
 frame_counter = 0
 price_orange = 300 / 1000  
 price_apple = 200 / 1000   
-api_endpoint = 'http://localhost:5000/'
+api_endpoint = 'http://192.168.87.159:5000/'
 def generate_qr_code(data):
     qr = qrcode.QRCode(
         version=1,
