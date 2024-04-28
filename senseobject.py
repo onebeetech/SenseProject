@@ -22,7 +22,9 @@ cap = cv.VideoCapture(0)
 starting_time = time.time()
 frame_counter = 0
 price_orange = 300 / 1000  
-price_apple = 200 / 1000   
+price_apple = 200 / 1000  
+price_banana = 150 / 1000
+price_mango = 400 / 1000
 api_endpoint = 'http://localhost:5000/'
 
 def generate_qr_code(data):
@@ -52,9 +54,11 @@ while True:
         break
     total_price_orange = 0
     total_price_apple = 0
+    total_price_banana = 0
+    total_price_mango = 0
     highest_score = 0
     for (classid, score, box) in zip(*model.detect(frame, Conf_threshold, NMS_threshold)):
-        if class_name[classid] not in ['apple', 'orange']:
+        if class_name[classid] not in ['apple', 'orange', 'banana', 'mango']:
             continue
         color = COLORS[int(classid) % len(COLORS)]
         label = "%s : %f" % (class_name[classid], score)
@@ -70,13 +74,19 @@ while True:
             total_price_orange += 150 * price_orange
         elif class_name[classid] == 'apple':
             total_price_apple += 150 * price_apple
+        elif class_name[classid] == 'banana':
+            total_price_banana += 150 * price_banana
+        elif class_name[classid] == 'mango':
+            total_price_mango += 150 * price_mango
 
-    if total_price_orange > 0 or total_price_apple > 0:
+    if total_price_orange > 0 or total_price_apple > 0 or total_price_banana > 0 or total_price_mango > 0:
         timestamp = time.time()
         data = {
             'data': {
                 'total_price_orange': total_price_orange,
                 'total_price_apple': total_price_apple,
+                'total_price_banana': total_price_banana,
+                'total_price_mango': total_price_mango,
                 'timestamp': format_timestamp(timestamp),
                 'score': last_detected_score
             }
