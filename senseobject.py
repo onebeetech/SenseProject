@@ -5,6 +5,7 @@ import json
 import qrcode
 from io import BytesIO
 from datetime import datetime
+
 Conf_threshold = 0.4
 NMS_threshold = 0.4
 COLORS = [(0, 255, 0), (0, 0, 255), (255, 0, 0),
@@ -23,6 +24,7 @@ frame_counter = 0
 price_orange = 300 / 1000  
 price_apple = 200 / 1000   
 api_endpoint = 'http://localhost:5000/'
+
 def generate_qr_code(data):
     qr = qrcode.QRCode(
         version=1,
@@ -37,8 +39,10 @@ def generate_qr_code(data):
     img.save(img_io, format='PNG')
     img_io.seek(0)
     return img_io
+
 def format_timestamp(timestamp):
     return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+
 while True:
     print("getting into this")
     ret, frame = cap.read()
@@ -46,12 +50,12 @@ while True:
     frame_counter += 1
     if not ret:
         break
-    total_objects = 0  
-    highest_score = 0  
+    total_price_orange = 0
+    total_price_apple = 0
+    highest_score = 0
     for (classid, score, box) in zip(*model.detect(frame, Conf_threshold, NMS_threshold)):
         if class_name[classid] not in ['apple', 'orange']:
             continue
-        total_objects += 1
         color = COLORS[int(classid) % len(COLORS)]
         label = "%s : %f" % (class_name[classid], score)
         cv.rectangle(frame, box, color, 1)
@@ -62,12 +66,17 @@ while True:
             last_detected_fruit = class_name[classid]
             last_detected_score = float(score)  
             last_detected_box = box
-    if total_objects > 0:
+        if class_name[classid] == 'orange':
+            total_price_orange += 150 * price_orange
+        elif class_name[classid] == 'apple':
+            total_price_apple += 150 * price_apple
+
+    if total_price_orange > 0 or total_price_apple > 0:
         timestamp = time.time()
         data = {
             'data': {
-                'fruit': last_detected_fruit,
-                'price': 150 * price_orange if last_detected_fruit == 'orange' else 150 * price_apple,
+                'total_price_orange': total_price_orange,
+                'total_price_apple': total_price_apple,
                 'timestamp': format_timestamp(timestamp),
                 'score': last_detected_score
             }
@@ -75,6 +84,7 @@ while True:
         response = requests.post(api_endpoint, json=data)
         print(data)
         print("Response from API:", response.text)
+        
     ending_time = time.time() - starting_time
     fps = frame_counter / ending_time
     cv.putText(frame, f'FPS: {fps:.2f}', (20, 20),
@@ -85,6 +95,7 @@ while True:
     key = cv.waitKey(1)
     if key == ord('q'):
         break
+
 cap.release()
 print("issue with camera")
 cv.destroyAllWindows()
