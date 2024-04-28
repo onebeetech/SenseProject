@@ -78,9 +78,12 @@ while True:
     fps = frame_counter / ending_time
     cv.putText(frame, f'FPS: {fps:.2f}', (20, 20),
                cv.FONT_HERSHEY_COMPLEX, 0.7, (0, 255, 0), 2)
+    print("opening frame")
     cv.imshow('frame', frame)
+    print("frame opened")
     key = cv.waitKey(1)
     if key == ord('q'):
         break
 cap.release()
+print("issue with camera")
 cv.destroyAllWindows()
