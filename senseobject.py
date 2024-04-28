@@ -73,6 +73,7 @@ while True:
             }
         }
         response = requests.post(api_endpoint, json=data)
+        print(data)
         print("Response from API:", response.text)
     ending_time = time.time() - starting_time
     fps = frame_counter / ending_time
